@@ -1,3 +1,4 @@
+// import './gesture-handler'
 import React, { useState } from 'react';
 import {
   View,
@@ -11,10 +12,26 @@ import { createDrawerNavigator, DrawerNavigationProp } from '@react-navigation/d
 import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { createStackNavigator } from '@react-navigation/stack';
+import Login from './Login';
+import Signup from './Signup';
 
-
+type DrawerParamList = {
+  MainContent: undefined;
+  Profile: undefined;
+  Bookmarks: undefined;
+  Settings: undefined;
+};
 
 const Drawer = createDrawerNavigator<DrawerParamList>();
+
+type RootStackParamList = {
+  Login: undefined;
+  Signup: undefined;
+  Home: undefined;
+};
+
+const Stack = createStackNavigator<RootStackParamList>();
 
 const CustomDrawerContent = () => {
   const navigation = useNavigation<DrawerNavigationProp<DrawerParamList>>();
@@ -22,7 +39,7 @@ const CustomDrawerContent = () => {
     <View style={styles.drawerContent}>
       <View style={styles.drawerHeader}>
         <Image
-          source={{ uri: 'https://via.placeholder.com/80' }}
+          source={require('../assets/images/profile.jpg')}
           style={styles.drawerProfileImage}
         />
         <Text style={styles.drawerName}>Your Name</Text>
@@ -145,23 +162,22 @@ const SettingsScreen = () => (
 
 const HomeScreen = () => {
   return (
-    <NavigationContainer>
-      <Drawer.Navigator
-        drawerContent={() => <CustomDrawerContent />}
-        screenOptions={{
-          drawerStyle: {
-            backgroundColor: '#1a1a1a',
-            width: 280,
-          },
-          headerShown: false,
-        }}
-      >
-        <Drawer.Screen name="MainContent" component={MainContent} />
-        <Drawer.Screen name="Profile" component={ProfileScreen} />
-        <Drawer.Screen name="Bookmarks" component={BookmarksScreen} />
-        <Drawer.Screen name="Settings" component={SettingsScreen} />
-      </Drawer.Navigator>
-    </NavigationContainer>
+    <Drawer.Navigator
+      backBehavior="history"
+      drawerContent={() => <CustomDrawerContent />}
+      screenOptions={{
+        drawerStyle: {
+          backgroundColor: '#1a1a1a',
+          width: 280,
+        },
+        headerShown: false,
+      }}
+    >
+      <Drawer.Screen name="MainContent" component={MainContent} />
+      <Drawer.Screen name="Profile" component={ProfileScreen} />
+      <Drawer.Screen name="Bookmarks" component={BookmarksScreen} />
+      <Drawer.Screen name="Settings" component={SettingsScreen} />
+    </Drawer.Navigator>
   );
 };
 
@@ -305,4 +321,19 @@ const styles = StyleSheet.create({
   },
 });
 
-export default HomeScreen; 
+export default function App() {
+  return (
+    <NavigationContainer>
+      <Stack.Navigator 
+        initialRouteName="Login"
+        screenOptions={{
+          headerShown: false
+        }}
+      >
+        <Stack.Screen name="Login" component={Login} />
+        <Stack.Screen name="Signup" component={Signup} />
+        <Stack.Screen name="Home" component={HomeScreen} />
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+} 
