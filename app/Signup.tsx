@@ -14,6 +14,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useAuth } from './contexts/AuthContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type RootStackParamList = {
   Login: undefined;
@@ -28,7 +29,7 @@ interface SignupProps {
 }
 
 const Signup: React.FC<SignupProps> = ({ navigation }) => {
-  const { signup } = useAuth();
+  const { signup, isFirstTime } = useAuth();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -149,6 +150,15 @@ const Signup: React.FC<SignupProps> = ({ navigation }) => {
     }
   };
 
+  const handleSkip = async () => {
+    try {
+      await AsyncStorage.setItem('isFirstTime', 'false');
+      navigation.navigate('Login');
+    } catch (error) {
+      console.error('Error skipping registration:', error);
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView
@@ -241,15 +251,15 @@ const Signup: React.FC<SignupProps> = ({ navigation }) => {
             )}
           </TouchableOpacity>
 
-          <View style={styles.loginContainer}>
-            <Text style={styles.loginText}>Already have an account? </Text>
+          {!isFirstTime && (
             <TouchableOpacity 
-              onPress={() => navigation.navigate('Login')}
+              style={styles.skipButton}
+              onPress={handleSkip}
               disabled={isLoading}
             >
-              <Text style={styles.loginLink}>Login</Text>
+              <Text style={styles.skipButtonText}>Already have an account? Login</Text>
             </TouchableOpacity>
-          </View>
+          )}
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -339,19 +349,14 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
-  loginContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginTop: 20,
+  skipButton: {
+    marginTop: 15,
+    alignItems: 'center',
   },
-  loginText: {
+  skipButtonText: {
     color: '#fff',
     fontSize: 14,
-  },
-  loginLink: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: 'bold',
+    textDecorationLine: 'underline',
   },
   strengthIndicator: {
     marginTop: 5,

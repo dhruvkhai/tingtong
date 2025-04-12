@@ -7,6 +7,7 @@ interface AuthContextType {
   user: AuthResponse['user'] | null;
   token: string | null;
   isLoading: boolean;
+  isFirstTime: boolean;
   login: (email: string, password: string) => Promise<void>;
   signup: (name: string, email: string, password: string, confirmPassword: string) => Promise<void>;
   logout: () => Promise<void>;
@@ -19,17 +20,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<AuthResponse['user'] | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isFirstTime, setIsFirstTime] = useState(true);
 
   useEffect(() => {
-    // Check for existing session on app start
+    // Check for existing session and first-time status on app start
     const loadSession = async () => {
       try {
         const storedToken = await AsyncStorage.getItem('token');
         const storedUser = await AsyncStorage.getItem('user');
+        const firstTime = await AsyncStorage.getItem('isFirstTime');
         
         if (storedToken && storedUser) {
           setToken(storedToken);
           setUser(JSON.parse(storedUser));
+        }
+        
+        if (firstTime === 'false') {
+          setIsFirstTime(false);
         }
       } catch (error) {
         console.error('Error loading session:', error);
@@ -58,8 +65,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const response = await authService.signup({ name, email, password, confirmPassword });
       await AsyncStorage.setItem('token', response.token);
       await AsyncStorage.setItem('user', JSON.stringify(response.user));
+      await AsyncStorage.setItem('isFirstTime', 'false');
       setToken(response.token);
       setUser(response.user);
+      setIsFirstTime(false);
     } catch (error) {
       throw error;
     }
@@ -81,15 +90,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const response = await authService.socialLogin(provider, token);
       await AsyncStorage.setItem('token', response.token);
       await AsyncStorage.setItem('user', JSON.stringify(response.user));
+      await AsyncStorage.setItem('isFirstTime', 'false');
       setToken(response.token);
       setUser(response.user);
+      setIsFirstTime(false);
     } catch (error) {
       throw error;
     }
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, isLoading, login, signup, logout, socialLogin }}>
+    <AuthContext.Provider value={{ user, token, isLoading, isFirstTime, login, signup, logout, socialLogin }}>
       {children}
     </AuthContext.Provider>
   );
