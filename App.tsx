@@ -4,7 +4,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { AuthProvider, useAuth } from './app/contexts/AuthContext';
 import Login from './app/Login';
 import Registration from './app/Registration';
-import Home from './app/Home';
+import index from './app/index';
 
 const Stack = createNativeStackNavigator();
 
@@ -24,7 +24,7 @@ const AuthStack = () => {
 const AppStack = () => {
   return (
     <Stack.Navigator>
-      <Stack.Screen name="Home" component={Home} />
+      <Stack.Screen name="Home" component={index} />
     </Stack.Navigator>
   );
 };
